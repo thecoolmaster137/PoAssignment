@@ -1,0 +1,149 @@
+﻿<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+@model PO_Assignment.Models.PoHeaderModel
+
+
+@{
+    ViewBag.Title = "Create";
+
+}
+
+
+@using (Html.BeginForm("Save", "PoEntry", FormMethod.Post, new { id = "poForm"}))
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <h4>Purchase Order Entry</h4>
+    <hr />
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" id="saveBtn" value="Save" class="btn btn-success" />
+            <button onclick="window.location.href='@Url.Action("Index", "PoEntry")'" class="btn btn-danger">Cancel</button>
+        </div>
+    </div>
+
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+
+    <div class="form-group">
+        <label for="OrderNumber" class="control-label col-md-2">Order No</label>
+        <div class="col-md-10">
+            <input type="text" id="orderNumber" name="OrderNumber" class="form-control" readonly />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="OrderDate" class="control-label col-md-2">Order Date</label>
+        <div class="col-md-10">
+            <input type="date" id="orderdate" name="orderdate" class="form-control">
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <label for="VendorId" class="control-label col-md-2">Vendor</label>
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.VendorId, (SelectList)ViewBag.Vendors, htmlAttributes: new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.VendorId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Notes, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.TextAreaFor(model => model.Notes, new { @class = "form-control", rows = "4" })
+            @Html.ValidationMessageFor(model => model.Notes, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="OrderValue" class="control-label col-md-2">Order Value</label>
+        <div class="col-md-10">
+            <input type="text" id="orderValue" class="form-control" readonly />
+        </div>
+    </div>
+
+    <div>
+        @Html.Partial("PartialPoDetails", new ViewDataDictionary { { "Materials", ViewBag.Materials } })
+    </div>
+
+
+
+</div>
+}
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '@Url.Action("GetNextPONumber", "PoEntry")',
+            type: 'GET',
+            success: function (data) {
+                $('#orderNumber').val(data.nextPONumber);
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    });
+</script>
+
+
+<script>
+    $('#saveBtn').click(function (e) {
+    e.preventDefault(); 
+
+
+    var headerFormData = $('#poForm').serialize();
+
+
+    var orderItems = [];
+    $('tbody tr').each(function () {
+        var material = $(this).find('td:eq(0)').text();
+        var shortText = $(this).find('td:eq(1)').text();
+        var quantity = $(this).find('td:eq(2)').text();
+        var rate = $(this).find('td:eq(3)').text();
+        var amount = $(this).find('td:eq(4)').text();
+        var expectedDate = $(this).find('td:eq(5)').text();
+
+
+        var orderItem = {
+            MaterialID: material,
+            ItemNotes: shortText,
+            ItemQuantity: quantity,
+            ItemRate: rate,
+            ItemValue: amount,
+            ExpectedDate: expectedDate
+        };
+
+
+        orderItems.push(orderItem);
+    });
+
+
+    var detailsJson = JSON.stringify(orderItems);
+
+
+    $.ajax({
+        url: '@Url.Action("Save", "PoEntry")',
+        type: 'POST',
+        data: headerFormData + '&detailsJson=' + detailsJson,
+        success: function (response) {
+            
+            console.log(response);
+        },
+        error: function (xhr, status, error) {
+            console.error(xhr.responseText);
+        }
+    });
+});
+
+</script>

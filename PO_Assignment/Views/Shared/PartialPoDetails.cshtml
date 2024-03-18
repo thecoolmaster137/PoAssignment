@@ -1,0 +1,183 @@
+﻿@model PO_Assignment.Models.PoDetailsModel
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+
+    <div class="form-group">
+        <label for="MaterialID" class="control-label col-md-2">Material</label>
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.MaterialID, (SelectList)ViewBag.Materials, "Select Material", new { @class = "form-control", id = "materialDropdown", required = "required" })
+            @Html.ValidationMessageFor(model => model.MaterialID, "", new { @class = "text-danger" })
+        </div>
+
+    </div>
+
+    <div class="form-group">
+        <label for="shortText" class="control-label col-md-2">Short Text</label>
+        <div class="col-md-10">
+            <input type="text" id="shortText" class="form-control" readonly />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="unit" class="control-label col-md-2">Unit</label>
+        <div class="col-md-10">
+            <input type="text" id="unit" class="form-control" readonly />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="ItemQuantity" class="control-label col-md-2">Quantity</label>
+        <div class="col-md-10">
+            <input type="number" id="ItemQuantity" name="ItemQuantity" class="form-control" min="1" step="1" required>
+            @Html.ValidationMessageFor(model => model.ItemQuantity, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="ItemRate" class="control-label col-md-2">Rate</label>
+        <div class="col-md-10">
+            <input type="number" id="ItemRate" name="ItemRate" class="form-control" min="1" step="1" required>
+            @Html.ValidationMessageFor(model => model.ItemRate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="ItemValue" class="control-label col-md-2">Amount</label>
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.ItemValue, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+            @Html.ValidationMessageFor(model => model.ItemValue, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="ExpectedDate" class="control-label col-md-2">Expected Date</label>
+        <div class="col-md-10">
+            <input type="date" id="expecteddate" name="expecteddate" class="form-control" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button id="addLineBtn" class="btn btn-success">Add Line</button>
+            <button class="btn btn-warning">Update Line</button>
+            <button class="btn btn-danger">Remove Line</button>
+        </div>
+    </div>
+
+    <h4>Order Items</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th scope="col">Select</th>
+                <th scope="col">Code</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Rate</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Expected Date</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+
+</div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#materialDropdown').change(function () {
+                var materialId = $(this).val();
+                $.ajax({
+                    url: '/PoDetails/GetMaterialDetails', 
+                    type: 'GET',
+                    data: { materialId: materialId },
+                    success: function (result) {
+                        $('#shortText').val(result.shortText); 
+                        $('#unit').val(result.unit); 
+                    },
+                    error: function () {
+                        alert('Error occurred while fetching material details.');
+                    }
+                });
+            });
+        });
+    </script>
+
+
+    <script>
+        $(document).ready(function () {
+            $('#ItemQuantity, #ItemRate').change(function () {
+                var quantity = parseInt($('#ItemQuantity').val());
+                var rate = parseInt($('#ItemRate').val());
+                if (quantity > 0 && rate > 0) {
+                    var amount = quantity * rate;
+                    $('#ItemValue').val(amount.toFixed(2)); 
+                } else {
+                    $('#ItemValue').val(''); 
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.getElementById("addLineBtn").addEventListener("click", function () {
+                var material = document.getElementById("materialDropdown").value;
+                var shortText = document.getElementById("shortText").value;
+                var unit = document.getElementById("unit").value;
+                var quantity = document.getElementById("ItemQuantity").value;
+                var rate = document.getElementById("ItemRate").value;
+                var amount = document.getElementById("ItemValue").value;
+                var expectedDate = document.getElementById("expecteddate").value;
+
+                if (!material || !shortText || !unit || !quantity || !rate || !amount || !expectedDate) {
+                    alert("Please fill in all fields.");
+                    return; 
+                }
+
+                
+                var newRow = document.createElement("tr");
+
+                
+                newRow.innerHTML = '<td>' + material + '</td><td>' + shortText + '</td><td>' + quantity + '</td><td>' + rate + '</td><td>' + amount + '</td><td>' + expectedDate + '</td>';
+
+               
+                document.querySelector("tbody").appendChild(newRow);
+
+                var orderValue = calculateOrderValue();
+                document.getElementById("orderValue").value = orderValue.toFixed(2);
+
+               
+                document.getElementById("materialDropdown").value = "";
+                document.getElementById("shortText").value = "";
+                document.getElementById("unit").value = "";
+                document.getElementById("ItemQuantity").value = "";
+                document.getElementById("ItemRate").value = "";
+                document.getElementById("ItemValue").value = "";
+                document.getElementById("expecteddate").value = "";
+
+            });
+        });
+
+        function calculateOrderValue() {
+            var total = 0;
+            var rows = document.querySelectorAll("tbody tr");
+            rows.forEach(function (row) {
+                var amount = parseFloat(row.querySelector("td:nth-child(5)").innerText);
+                if (!isNaN(amount)) {
+                    total += amount;
+                }
+            });
+            return total;
+        }
+    </script>
+}
+

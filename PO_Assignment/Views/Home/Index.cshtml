@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+
+
+<div>
+
+    <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+        <div class="row">
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" style="margin-bottom: 10px;" onclick="location.href='@Url.Action("Index","VendorEntry")'">Vendor Entry</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" style="margin-bottom: 10px;" onclick="location.href='@Url.Action("Index","MaterialEntry")'">Material Entry</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" style="margin-bottom: 10px;" onclick="location.href='@Url.Action("Index","PoEntry")'">PO Entry</button>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+

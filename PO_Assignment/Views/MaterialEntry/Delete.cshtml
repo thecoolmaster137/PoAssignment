@@ -1,0 +1,80 @@
+﻿@model PO_Assignment.Models.MaterialEntryModel
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>MaterialEntryModel</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Code)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Code)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ShortText)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ShortText)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.LongText)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.LongText)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Unit)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Unit)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ReorderLevel)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ReorderLevel)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.MinOrderQuantity)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.MinOrderQuantity)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsActive)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsActive)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    }
+</div>
